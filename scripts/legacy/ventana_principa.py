@@ -25,10 +25,10 @@ from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy, QoSDur
 # Importar interfaces
 import interfaces
 from interfaces import Widget_lidar, Widgets_cameraCV
-import interfaces.Modulo_velocidad
+from interfaces import Modulo_velocidad
 
 # Importar splash screen
-from pantalla_de_carga.splash_screen import SplashScreen
+from ui.splash.splash_screen import SplashScreen
 
 import cv2
 import numpy as np
@@ -243,7 +243,7 @@ class ventana_Turtlebot(QMainWindow):
         
         # Widget de velocidad/control
         try:
-            self.Wigdet_Velocidad = interfaces.Modulo_velocidad.Widget_Modulo_velocidad()
+            self.Wigdet_Velocidad = Modulo_velocidad.Widget_Modulo_velocidad()
             print("  ✅ Widget velocidad creado")
         except Exception as e:
             print(f"  ❌ Error creando widget velocidad: {e}")

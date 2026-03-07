@@ -10,9 +10,9 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist
 
 from interfaces.herramientas.clases import DifferentialDriver
-from .QJoyStick import QJoystickControl
-from . import Widget_velocidad_botones
-from .GamePadClase import GamepadFullReader 
+from interfaces.input.joystick import QJoystickControl
+from interfaces.widgets import velocidad_botones_ui
+from interfaces.input.gamepad import GamepadFullReader 
 
 
 def Redimencionar_QIcon(Widget_guia, Boton, escala):
@@ -20,7 +20,7 @@ def Redimencionar_QIcon(Widget_guia, Boton, escala):
     Boton.setIconSize(QSize(size, size))
 
 
-class Widget_Modulo_velocidad(QWidget, Widget_velocidad_botones.Ui_Widget_principal):
+class Widget_Modulo_velocidad(QWidget, velocidad_botones_ui.Ui_Widget_principal):
     def __init__(self):
         super().__init__()
         self.setupUi(self)

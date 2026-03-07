@@ -62,9 +62,9 @@ def cargar_dependencias() -> None:
         ROS_DISPONIBLE = False
 
     try:
-        from interfaces import Widget_lidar as _Widget_lidar
-        from interfaces import Widgets_cameraCV as _Widgets_cameraCV
-        from interfaces import Modulo_velocidad as _Modulo_velocidad
+        from interfaces.widgets import lidar_widget as _Widget_lidar
+        from interfaces.widgets import camera_widget as _Widgets_cameraCV
+        from interfaces.widgets import modulo_velocidad as _Modulo_velocidad
 
         Widget_lidar = _Widget_lidar
         Widgets_cameraCV = _Widgets_cameraCV
