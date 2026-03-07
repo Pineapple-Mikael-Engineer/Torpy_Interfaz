@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Widget_principal</class>
+ <widget class="QWidget" name="Widget_principal">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1053</width>
+    <height>687</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="layout_principal_widget" stretch="1,8">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QLabel" name="label_Widget_velocidad">
+     <property name="styleSheet">
+      <string notr="true">#label_Widget_velocidad {
+    color: #e0f7fa;                /* Azul claro */
+    background-color: #102027;     /* Azul muy oscuro */
+    border: 2px solid #4dd0e1;     /* Cian brillante */
+    border-radius: 10px;
+    padding: 10px 15px;
+    font-size: 20px;
+    font-weight: bold;
+    font-family: 'Segoe UI', 'Ubuntu', sans-serif;
+    letter-spacing: 1px;
+    qproperty-alignment: 'AlignCenter';
+}</string>
+     </property>
+     <property name="text">
+      <string>Velocidades </string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="frame_contenedor_general">
+     <property name="styleSheet">
+      <string notr="true">QFrame {
+    background-color: #0b181c;        /* Azul muy oscuro, base profunda */
+    border: 2px solid #4dd0e1;        /* Borde cian brillante */
+    border-radius: 12px;
+    padding: 10px;
+}
+
+/* Opcional: si el frame contiene otros frames o etiquetas internas */
+QFrame &gt; QLabel {
+    color: #b3e5fc;
+    background-color: transparent;
+}
+
+QPushButton {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #14424b, stop:1 #0b181c
+    );                                      /* Degradado frío */
+    color: #e0f7fa;
+    border: 2px solid #4dd0e1;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 14px;
+    font-family: 'Segoe UI', 'Ubuntu', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: all 150ms ease-in-out;
+    box-shadow: 0 0 6px rgba(77, 208, 225, 0.3);   /* Sutil resplandor */
+}
+
+QPushButton:hover {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #1f5966, stop:1 #14424b
+    );
+    border: 2px solid #80deea;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(128, 222, 234, 0.5); /* Más brillo */
+    transform: scale(1.02);                       /* Ligero agrandamiento */
+}
+
+QPushButton:pressed {
+    background-color: #0a2a33;
+    border: 2px solid #00bcd4;
+    color: #b2ebf2;
+    box-shadow: 0 0 12px rgba(0, 188, 212, 0.6);
+    transform: scale(0.98);
+}
+
+QPushButton:disabled {
+    background-color: #1c313a;
+    color: #607d8b;
+    border: 1px solid #455a64;
+    box-shadow: none;
+}</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QVBoxLayout" name="layout_contenedor_general">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <layout class="QHBoxLayout" name="layout_contenedor_general_botones" stretch="15,25,15,5">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QPushButton" name="button_giro_antihorario">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="layout_botones_lineal" stretch="10,10">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="button_avanzar">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="button_retroceder">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="button_giro_horario">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="slider_velocidad">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
