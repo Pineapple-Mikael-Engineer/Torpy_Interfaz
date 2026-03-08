@@ -3,8 +3,14 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QPainter, QPen, QColor, QFont, QPainterPath, QImage, QPixmap
 import math
-import cv2
-import numpy as np
+try:
+    import cv2
+    import numpy as np
+    CAMERA_LIBS_OK = True
+except ImportError:
+    cv2 = None
+    np = None
+    CAMERA_LIBS_OK = False
 
 class CameraDiagramWidget(QWidget):
     """Widget que permite cambiar entre vista de cámara y diagrama del robot"""
@@ -186,6 +192,11 @@ class CameraWidget(QWidget):
         
     def iniciar_camara_real(self):
         """Activa el modo de cámara real desde ROS"""
+        if not CAMERA_LIBS_OK:
+            print("⚠️ OpenCV/Numpy no disponibles, se mantiene cámara simulada")
+            self.iniciar_camara_simulada()
+            return
+
         self.camera_activa = True
         self.camera_simulada = False
         if self.timer_simulacion.isActive():
@@ -200,7 +211,10 @@ class CameraWidget(QWidget):
             
         if self.ros_camera_node is None:
             return
-        
+
+        if not CAMERA_LIBS_OK:
+            return
+
         # Verificar si hay un nuevo frame disponible
         if hasattr(self.ros_camera_node, 'last_frame') and self.ros_camera_node.last_frame is not None:
             try:
