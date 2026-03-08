@@ -5,14 +5,18 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import QSize, QTimer
 from PyQt6.QtGui import QColor
 
-import rclpy
-from rclpy.node import Node
-from geometry_msgs.msg import Twist
+try:
+    import rclpy
+    from geometry_msgs.msg import Twist
+    ROS_CONTROL_OK = True
+except ImportError:
+    rclpy = None
+    Twist = None
+    ROS_CONTROL_OK = False
 
 from interfaces.herramientas.clases import DifferentialDriver
-from .QJoyStick import QJoystickControl
-from . import Widget_velocidad_botones
-from .GamePadClase import GamepadFullReader 
+from interfaces.input.joystick import QJoystickControl
+from interfaces.widgets import velocidad_botones_ui
 
 
 def Redimencionar_QIcon(Widget_guia, Boton, escala):
@@ -20,26 +24,30 @@ def Redimencionar_QIcon(Widget_guia, Boton, escala):
     Boton.setIconSize(QSize(size, size))
 
 
-class Widget_Modulo_velocidad(QWidget, Widget_velocidad_botones.Ui_Widget_principal):
+class Widget_Modulo_velocidad(QWidget, velocidad_botones_ui.Ui_Widget_principal):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
 
-        # ========== INICIALIZAR ROS2 ==========
-        if not rclpy.ok():
-            rclpy.init()
-        
-        self.ros_node = rclpy.create_node(
-            'interface_controller',
-            namespace='Mikael'
-        )
+        # ========== INICIALIZAR ROS2 (opcional) ==========
+        self.ros_node = None
+        self.publisher = None
+        self.ros_timer = None
+        if ROS_CONTROL_OK:
+            if not rclpy.ok():
+                rclpy.init()
 
-        self.publisher = self.ros_node.create_publisher(Twist, 'cmd_vel_raw', 10)
-        
-        # Timer para procesar ROS2 sin bloquear el GUI
-        self.ros_timer = QTimer()
-        self.ros_timer.timeout.connect(lambda: rclpy.spin_once(self.ros_node, timeout_sec=0))
-        self.ros_timer.start(10)  # cada 10ms
+            self.ros_node = rclpy.create_node(
+                'interface_controller',
+                namespace='Mikael'
+            )
+            self.publisher = self.ros_node.create_publisher(Twist, 'cmd_vel_raw', 10)
+
+            self.ros_timer = QTimer()
+            self.ros_timer.timeout.connect(lambda: rclpy.spin_once(self.ros_node, timeout_sec=0))
+            self.ros_timer.start(10)  # cada 10ms
+        else:
+            print('⚠️ ROS2 no disponible en Widget_Modulo_velocidad: controles en modo local')
         
         # Variable para guardar velocidad actual del slider
         self.current_speed = 0.5  # Velocidad por defecto (50%)
@@ -49,8 +57,8 @@ class Widget_Modulo_velocidad(QWidget, Widget_velocidad_botones.Ui_Widget_princi
         # Clase de driver velocidad (para usar con joystick en el futuro)
         self.velocidad_calculator = DifferentialDriver(speed_factor=1)
         
-        # base path del módulo
-        base = os.path.dirname(__file__)
+        # base path de interfaces (para multimedia compartida)
+        base = os.path.dirname(os.path.dirname(__file__))
 
         # ===Agregar QJoyStick===
         self.widget_joystick = QJoystickControl(
@@ -291,6 +299,10 @@ class Widget_Modulo_velocidad(QWidget, Widget_velocidad_botones.Ui_Widget_princi
             linear_x: velocidad lineal (-1.0 a 1.0), positivo = adelante
             angular_z: velocidad angular (-1.0 a 1.0), positivo = giro izquierda
         """
+        if not ROS_CONTROL_OK or self.publisher is None:
+            print(f"🧪 Simulación movimiento → linear: {linear_x * self.current_speed:.2f}, angular: {angular_z * self.current_speed:.2f}")
+            return
+
         msg = Twist()
         msg.linear.x = float(linear_x * self.current_speed)
         msg.angular.z = float(angular_z * self.current_speed)
@@ -300,8 +312,10 @@ class Widget_Modulo_velocidad(QWidget, Widget_velocidad_botones.Ui_Widget_princi
     def closeEvent(self, event):
         """Se ejecuta cuando se cierra la ventana"""
         print("🔌 Cerrando módulo de velocidad...")
-        self.ros_timer.stop()
-        self.ros_node.destroy_node()
+        if self.ros_timer:
+            self.ros_timer.stop()
+        if self.ros_node:
+            self.ros_node.destroy_node()
         # NO hacer rclpy.shutdown() - otros widgets pueden estar usándolo
         event.accept()
     
