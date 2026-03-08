@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import traceback
+import importlib
 
 ROS_DISPONIBLE = False
 INTERFACES_OK = False
@@ -21,6 +21,17 @@ cv2 = None
 Widget_lidar = None
 Widgets_cameraCV = None
 Modulo_velocidad = None
+
+
+def _import_optional(module_path: str, alias_name: str):
+    """Importa un módulo opcional de forma aislada."""
+    try:
+        module = importlib.import_module(module_path)
+        print(f"✅ {alias_name} importado")
+        return module
+    except ImportError as error:
+        print(f"⚠️  {alias_name} no disponible: {error}")
+        return None
 
 
 def cargar_dependencias() -> None:
@@ -61,17 +72,13 @@ def cargar_dependencias() -> None:
         print(f"⚠️  ROS2 no disponible: {error}")
         ROS_DISPONIBLE = False
 
-    try:
-        from interfaces.widgets import lidar_widget as _Widget_lidar
-        from interfaces.widgets import camera_widget as _Widgets_cameraCV
-        from interfaces.widgets import modulo_velocidad as _Modulo_velocidad
+    # Carga modular independiente: un fallo no bloquea los demás módulos
+    Widgets_cameraCV = _import_optional("interfaces.widgets.camera_widget", "Widgets_cameraCV")
+    Widget_lidar = _import_optional("interfaces.widgets.lidar_widget", "Widget_lidar")
+    Modulo_velocidad = _import_optional("interfaces.widgets.modulo_velocidad", "Modulo_velocidad")
 
-        Widget_lidar = _Widget_lidar
-        Widgets_cameraCV = _Widgets_cameraCV
-        Modulo_velocidad = _Modulo_velocidad
-        INTERFACES_OK = True
-        print("✅ Interfaces importadas correctamente")
-    except ImportError as error:
-        print(f"⚠️  Error importando interfaces: {error}")
-        traceback.print_exc()
-        INTERFACES_OK = False
+    INTERFACES_OK = any([Widgets_cameraCV, Widget_lidar, Modulo_velocidad])
+    if INTERFACES_OK:
+        print("✅ Interfaces disponibles parcialmente/total")
+    else:
+        print("⚠️  Ningún módulo de interfaces disponible")

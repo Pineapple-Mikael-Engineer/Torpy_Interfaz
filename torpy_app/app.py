@@ -5,8 +5,6 @@ from __future__ import annotations
 import signal
 import sys
 
-from PyQt6.QtWidgets import QApplication
-
 from torpy_app import config
 
 
@@ -17,6 +15,8 @@ def _signal_handler(sig, frame):
 
 def run() -> int:
     """Inicializa dependencias y ejecuta la GUI principal."""
+    from PyQt6.QtWidgets import QApplication
+
     signal.signal(signal.SIGINT, _signal_handler)
 
     config.cargar_dependencias()

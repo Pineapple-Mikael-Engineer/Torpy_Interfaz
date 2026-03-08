@@ -68,7 +68,7 @@ class VentanaTurtlebot(QMainWindow):
         print()
 
     def _instanciar_widget_velocidad(self):
-        if config.INTERFACES_OK and config.Modulo_velocidad:
+        if config.Modulo_velocidad:
             try:
                 print("  ✅ Widget velocidad")
                 return config.Modulo_velocidad.Widget_Modulo_velocidad()
@@ -80,7 +80,7 @@ class VentanaTurtlebot(QMainWindow):
         return self._crear_widget_placeholder("Velocidad")
 
     def _instanciar_widget_camara(self):
-        if config.INTERFACES_OK and config.Widgets_cameraCV:
+        if config.Widgets_cameraCV:
             try:
                 print("  ✅ Widget cámara")
                 return config.Widgets_cameraCV.CameraDiagramWidget()
@@ -92,7 +92,7 @@ class VentanaTurtlebot(QMainWindow):
         return self._crear_widget_placeholder("Cámara")
 
     def _instanciar_widget_lidar(self):
-        if config.INTERFACES_OK and config.Widget_lidar:
+        if config.Widget_lidar:
             try:
                 print("  ✅ Widget LiDAR")
                 return config.Widget_lidar.LidarWidget(topic_name="/scan", scale=100, debug=True)
