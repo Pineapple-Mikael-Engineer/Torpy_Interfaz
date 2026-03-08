@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QSizePolicy
 from PyQt6.QtCore import Qt, QPointF, pyqtSignal, QTimer, QElapsedTimer
 from PyQt6.QtGui import QColor, QPainter, QPen, QBrush, QPixmap, QRadialGradient
-from . import GamePadClase
+from interfaces.input import gamepad
 import math
 
 def square_to_circle(x: float, y: float) -> tuple[float, float]:
@@ -56,7 +56,7 @@ class QJoystickControl(QWidget):
             self.iniciar_gamepad_izquierdo()
 
     def iniciar_gamepad_izquierdo(self):
-        self.gamepad_thread = GamePadClase.GamepadFullReader()
+        self.gamepad_thread = gamepad.GamepadFullReader()
         self.gamepad_thread.left_stick_moved.connect(self.actualizar_desde_gamepad)
         self.gamepad_thread.start()
 
