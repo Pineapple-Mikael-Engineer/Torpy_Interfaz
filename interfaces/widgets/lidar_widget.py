@@ -1,17 +1,8 @@
 import math
 
 from PyQt6.QtCore import QPointF, Qt, QTimer, pyqtSignal
-from PyQt6.QtGui import QBrush, QColor, QFont, QPainter, QPen, QRadialGradient
-from PyQt6.QtWidgets import (
-    QCheckBox,
-    QGroupBox,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QSlider,
-    QVBoxLayout,
-    QWidget,
-)
+from PyQt6.QtGui import QColor, QFont, QPainter, QPen
+from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
 try:
     from sensor_msgs.msg import LaserScan
@@ -24,32 +15,74 @@ except ImportError:
     LIDAR_ROS_OK = False
 
 
+def _draw_lidar_scene(painter, canvas, ranges, angle_min, angle_increment, point_size=2):
+    """Dibuja rejilla + robot + puntos LiDAR o patrón simulado si no hay datos."""
+    painter.fillRect(canvas.rect(), QColor(20, 20, 20))
+    cx = canvas.width() / 2
+    cy = canvas.height() / 2
+
+    # Rejilla
+    painter.setPen(QPen(QColor(60, 60, 60), 1))
+    for r in (50, 100, 150, 200):
+        painter.drawEllipse(QPointF(cx, cy), r, r)
+
+    # Ejes
+    painter.setPen(QPen(QColor(70, 70, 70), 1, Qt.PenStyle.DashLine))
+    painter.drawLine(0, int(cy), canvas.width(), int(cy))
+    painter.drawLine(int(cx), 0, int(cx), canvas.height())
+
+    # Robot (centro)
+    painter.setPen(QPen(QColor(255, 255, 255), 2))
+    painter.setBrush(QColor(255, 100, 100))
+    painter.drawEllipse(QPointF(cx, cy), 6, 6)
+
+    # Puntos reales o simulados
+    painter.setPen(QPen(QColor(0, 255, 120), point_size))
+
+    if ranges and angle_increment > 0:
+        for i, dist in enumerate(ranges):
+            if not math.isfinite(dist) or dist <= 0:
+                continue
+            angle = angle_min + i * angle_increment
+            draw_dist = min(dist * 60, min(cx, cy) - 10)
+            px = cx + math.cos(angle) * draw_dist
+            py = cy + math.sin(angle) * draw_dist
+            painter.drawPoint(QPointF(px, py))
+    else:
+        # Patrón simulado para visualizar incluso sin datos
+        samples = 90
+        for i in range(samples):
+            angle = (2 * math.pi / samples) * i
+            pulse = (math.sin(i * 0.35) + 1) / 2
+            draw_dist = 50 + pulse * (min(cx, cy) - 20)
+            px = cx + math.cos(angle) * draw_dist
+            py = cy + math.sin(angle) * draw_dist
+            painter.drawPoint(QPointF(px, py))
+
+
 if LIDAR_ROS_OK:
     class LidarWidget(Node, QWidget):
         scan_data_received = pyqtSignal(list, float, float)
 
         def __init__(self, topic_name="/Torpy/scan", scale=60, debug=False):
-            Node.__init__(self, "Mikael_rplidar_composition")
+            Node.__init__(self, "mikael_rplidar_composition")
             QWidget.__init__(self)
 
             self.debug = debug
             self.ranges = []
             self.angle_min = 0.0
             self.angle_increment = 0.0
-            self.scale = scale
-            self.point_size = 3
-            self.show_grid = True
-            self.show_axes = True
+            self.point_size = 2
 
-            self.setup_ui()
+            self._setup_ui()
             self.create_subscription(LaserScan, topic_name, self.scan_callback, 10)
             self.scan_data_received.connect(self.update_scan_data)
 
             self.timer = QTimer(self)
-            self.timer.timeout.connect(self.update)
+            self.timer.timeout.connect(self.canvas.update)
             self.timer.start(50)
 
-        def setup_ui(self):
+        def _setup_ui(self):
             root = QVBoxLayout(self)
             header = QLabel("LiDAR Viewer")
             header.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -72,38 +105,48 @@ if LIDAR_ROS_OK:
 
         def _paint_lidar(self, event):
             painter = QPainter(self.canvas)
-            painter.fillRect(self.canvas.rect(), QColor(20, 20, 20))
-            cx = self.canvas.width() / 2
-            cy = self.canvas.height() / 2
-
-            painter.setPen(QPen(QColor(60, 60, 60), 1))
-            for r in (50, 100, 150):
-                painter.drawEllipse(QPointF(cx, cy), r, r)
-
-            painter.setPen(QPen(QColor(255, 255, 255), 2))
-            painter.setBrush(QBrush(QColor(255, 100, 100)))
-            painter.drawEllipse(QPointF(cx, cy), 6, 6)
-
-            painter.setPen(QPen(QColor(0, 255, 120), 2))
-            for i, dist in enumerate(self.ranges):
-                if not math.isfinite(dist) or dist <= 0:
-                    continue
-                a = self.angle_min + i * self.angle_increment
-                px = cx + math.cos(a) * dist * self.scale
-                py = cy + math.sin(a) * dist * self.scale
-                painter.drawPoint(QPointF(px, py))
+            _draw_lidar_scene(
+                painter,
+                self.canvas,
+                self.ranges,
+                self.angle_min,
+                self.angle_increment,
+                point_size=self.point_size,
+            )
 else:
     class LidarWidget(QWidget):
-        """Fallback sin ROS: mantiene el importable y muestra estado."""
+        """Fallback sin ROS: siempre grafica patrón LiDAR simulado."""
 
         def __init__(self, topic_name="/Torpy/scan", scale=60, debug=False):
             super().__init__()
-            layout = QVBoxLayout(self)
-            title = QLabel("⚠️ LiDAR no disponible")
+            self.ranges = []
+            self.angle_min = 0.0
+            self.angle_increment = 0.0
+            self.point_size = 2
+
+            root = QVBoxLayout(self)
+            title = QLabel("⚠️ LiDAR sin ROS (modo simulado)")
             title.setAlignment(Qt.AlignmentFlag.AlignCenter)
             title.setFont(QFont("Arial", 12, QFont.Weight.Bold))
-            info = QLabel("Falta ROS2/sensor_msgs en el entorno.\nSe muestra modo visual fallback.")
-            info.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            info.setStyleSheet("color: #bbb;")
-            layout.addWidget(title)
-            layout.addWidget(info)
+            title.setStyleSheet("color: #e0e0e0;")
+            root.addWidget(title)
+
+            self.canvas = QWidget()
+            self.canvas.setMinimumSize(400, 400)
+            self.canvas.paintEvent = self._paint_lidar
+            root.addWidget(self.canvas)
+
+            self.timer = QTimer(self)
+            self.timer.timeout.connect(self.canvas.update)
+            self.timer.start(80)
+
+        def _paint_lidar(self, event):
+            painter = QPainter(self.canvas)
+            _draw_lidar_scene(
+                painter,
+                self.canvas,
+                self.ranges,
+                self.angle_min,
+                self.angle_increment,
+                point_size=self.point_size,
+            )
