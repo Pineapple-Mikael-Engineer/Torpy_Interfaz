@@ -17,7 +17,6 @@ except ImportError:
 from interfaces.herramientas.clases import DifferentialDriver
 from interfaces.input.joystick import QJoystickControl
 from interfaces.widgets import velocidad_botones_ui
-from interfaces.input.gamepad import GamepadFullReader 
 
 
 def Redimencionar_QIcon(Widget_guia, Boton, escala):
